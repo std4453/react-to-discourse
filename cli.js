@@ -61,20 +61,25 @@ const chalk = require('chalk');
             pluginNameKebab: _.kebabCase(pluginName),
         };
 
-        const files = await glob(path.join(templateDir, '**'), { mark: true });
+        const files = await glob(path.join(templateDir, '**'), { mark: true, dot: true });
         for (const file of files) {
             let destination = file.replace(templateDir, targetDir);
             for (const key in data) {
                 destination = destination.replace(`{${key}}`, data[key]);
             }
-            destination = destination.replace(/\.ejs$/, '');
             if (file.endsWith('/')) { // dir
                 await mkdirp(destination);
                 console.log(chalk.blue('mkdir') + ' ' + destination);
             } else { // file
-                const content = await ejs.renderFile(file, data);
-                await fs.writeFile(destination, content);
-                console.log(chalk.green('create') + ' ' + destination);
+                if (file.endsWith('.ejs')) { // template
+                    destination = destination.replace(/\.ejs$/, '');
+                    const content = await ejs.renderFile(file, data);
+                    await fs.writeFile(destination, content);
+                    console.log(chalk.green('ejs') + ' ' + destination);
+                } else { // copy onle
+                    await fs.copy(file, destination);
+                    console.log(chalk.magenta('copy') + ' ' + destination);
+                }
             }
         }
 
