@@ -1,0 +1,4 @@
+plugins:
+  rtd_test_enabled:
+    default: true
+    client: true
