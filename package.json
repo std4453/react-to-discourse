@@ -1,0 +1,34 @@
+{
+  "name": "react-to-discourse",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/std4453/react-to-discourse.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/std4453/react-to-discourse/issues"
+  },
+  "homepage": "https://github.com/std4453/react-to-discourse#readme",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "ejs": "^3.1.6",
+    "fs-extra": "^9.1.0",
+    "glob": "^7.1.6",
+    "glob-promise": "^4.1.0",
+    "inquirer": "^8.0.0",
+    "lodash": "^4.17.21",
+    "mkdirp": "^1.0.4",
+    "pascal-case": "^3.1.2"
+  },
+  "bin": {
+    "create-rtd-app": "./cli.js"
+  }
+}

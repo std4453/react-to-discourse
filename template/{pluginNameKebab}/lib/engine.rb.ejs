@@ -1,0 +1,13 @@
+module <%= pluginName %>
+  class Engine < ::Rails::Engine
+    engine_name "<%= pluginName %>".freeze
+    isolate_namespace <%= pluginName %>
+
+    config.after_initialize do
+      Discourse::Application.routes.append do
+        mount ::<%= pluginName %>::Engine, at: "/<%= route %>"
+      end
+    end
+  end
+end
+  
