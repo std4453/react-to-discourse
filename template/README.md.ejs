@@ -1,0 +1,57 @@
+# react-to-discourse
+
+This package is bootstrapted by `react-to-discourse`, you can modify it freely on your own.
+
+## Usage
+
+First install dependencies:
+
+```bash
+$ yarn
+```
+
+or 
+
+```bash
+$ npm install
+```
+
+Write your code in `src/` like any other React app, then run `yarn build` or `npm run build` to build the app.
+
+The built file will be at `<%= pluginNameKebab %>/assets/javascripts/discourse/lib/index.js.es6`, it contains all your libraries, stylesheets and other assets. You can configure the build process yourself by editing `rollup.config.js`.
+
+After building, the `<%= pluginNameKebab %>` directory will be a valid discourse plugin, you can copy or symbolic link it into your discourse plugins folder, or [follow the official directions](https://meta.discourse.org/t/install-plugins-in-discourse/19157).
+
+Note that you will need to restart `unicorn` every time you rebuild and update the plugin files.
+
+## Writing React App
+
+The template app features dynamic API fetching, CSS ([PostCSS](https://postcss.org/) ) importing, inline styles and image asset importing, you should see them working. These are almost identical to a implementing a normal React app, with a few differences:
+
+- We recommend making Discourse API calls with `discourse/lib/ajax`, since it attaches CSRF tokens and prevents compatibility issues.
+- Other API calls can be made with arbitrary libraries, however you'll have to modify the website's CSP settings, which we cannot and don't wish to modify in our plugin.
+- Available asset extensions are configured in `rollup.config.js`, see [`rollup-plugin-smart-asset`](https://www.npmjs.com/package/rollup-plugin-smart-asset).
+
+## More Details
+
+This repository uses [rollup.js](https://rollupjs.org/) for building and bundling, you can use your favourite building system, like `webpack` or `snowpack`.
+
+Meanwhile, this react-to-discourse implementation owes its structure to some a few characteristics of Discourse.
+
+[Discource](https://discourse.org/) runs on [Ruby on Rails](https://rubyonrails.org/) - a MVC framework, and [ember.js](https://emberjs.com/) - a MVVM frontend framework, so it provides a full-stack solution by itself. What we're doing here is injecting the React framework into that monster - with pains.
+
+First, discourse limits inline scripting by [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) - which is good practice, so you can't inject `script` tags into [handlebars](https://handlebarsjs.com/) templates. 
+
+Second, RoR forces its MVC pattern, so every page you create should have a [controller](<%= pluginNameKebab %>/app/controllers/<%= pluginNameSnake %>/my_controller.rb) and a [view](<%= pluginNameKebab %>/lib/engine.rb), which have to be written in ruby.
+
+We're making these files as straightforward as possible, containing no functionality at all, so that you can focus on adding your implementations in React.
+
+Third, ember.js follows the MVVM pattern, so we have a [viewmodel](<%= pluginNameKebab %>/assets/javascripts/discourse/routes/my-index.js.es6), which specifies its own [controller](<%= pluginNameKebab %>/assets/javascripts/discourse/controllers/my.js.es6) and [view](<%= pluginNameKebab %>/assets/javascripts/discourse/templates/my.hbs).
+
+In that view, we reference our [react-el component](<%= pluginNameKebab %>/assets/javascripts/discourse/components/react-el.js.es6) (which has an [empty view](<%= pluginNameKebab %>/assets/javascripts/discourse/templates/components/react-el.hbs) ), which in turn calls our bundled [index.js](<%= pluginNameKebab %>/assets/javascripts/discourse/lib/index.js.es6).
+
+If you're modifying these parts, say, adding discourse components into the page, running SQLs on page render for data that don't have an API, injecting into one of the discourse outlets, you'll have to do that by modifying the aforementioned files since that can't be done in the React app. We're planning on adding some JSON configuration files to help you with that.
+
+Finally, discourse requires every asset to be registered in its [`plugin.rb`](<%= pluginNameKebab %>/plugin.rb), which is pretty awkward, while files under [`/lib`](<%= pluginNameKebab %>/assets/javascripts/discourse/lib) are loaded automatically, but only javascript files, so we use `rollup-plugin-smart-asset` to convert asset files to base64 URLs embedded in js. That's going to be some space overhead, hopefully gzip will help. We're planning on modifying `plugin.rb` to load assets automatically as well.
+
+Extra: Why bundling? `snowpack` generates ES6 modules and discourse likes ESM. That's because discourse's resolving system is pretty clumsy by not trying file extensions (import `./foo` access `./foo.js`), and `snowpack` is not yet so clever to handle that. Meanwhile bundling is a common solution in frontend so it's our current solution.
